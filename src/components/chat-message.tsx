@@ -11,7 +11,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
       className={`flex ${role === "user" ? "justify-end" : "justify-start"}`}
     >
       <div
-        className={`flex items-start space-x-2 ${
+        className={`flex items-start ${
           role === "user" ? "flex-row-reverse" : "flex-row"
         }`}
       >
@@ -20,7 +20,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
         </Avatar>
         <div
           className={`p-3 rounded-lg ${
-            role === "user" ? "bg-blue-600" : "bg-green-600"
+            role === "user" ? "bg-blue-600 mr-2" : "bg-green-600 ml-2"
           }`}
         >
           <p className="text-sm">{content}</p>
