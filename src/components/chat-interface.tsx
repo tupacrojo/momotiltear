@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage } from "@/components/chat-message";
@@ -89,7 +88,7 @@ export default function ChatInterface() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white transition-all duration-150">
-      <main className="flex-1 flex flex-col p-4 max-w-3xl mx-auto w-full justify-center">
+      <main className="flex-1 flex flex-col p-4 max-w-4xl mx-auto w-full justify-center">
         <h1 className="text-4xl md:text-6xl font-bold text-center mb-8">
           ¿Qué está haciendo momo?
         </h1>
@@ -106,7 +105,7 @@ export default function ChatInterface() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
-          <div className="relative">
+          <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -117,9 +116,24 @@ export default function ChatInterface() {
             <Button
               type="submit"
               disabled={isLoading || message.trim() === ""}
-              className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700"
+              className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
             >
-              {isLoading ? "Enviando..." : <Send size={20} />}
+              {isLoading ? (
+                "Enviando..."
+              ) : (
+                <>
+                  <svg
+                    className="w-5 h-5 rotate-90 rtl:-rotate-90"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 18 20"
+                  >
+                    <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+                  </svg>
+                  <span className="sr-only">Send message</span>
+                </>
+              )}
             </Button>
           </div>
         </form>
