@@ -17,7 +17,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "MomoTiltear",
   description:
-    "Tiltea a momo, decime que esta haciendo momo y hagammoslo enojar",
+    "Tiltea a momo, decime que esta haciendo momo y lo hacemos enojar",
   robots: "index, follow",
 };
 

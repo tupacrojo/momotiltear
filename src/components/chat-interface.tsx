@@ -5,6 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage } from "@/components/chat-message";
 import OpenAI from "openai";
+import { User } from "firebase/auth";
+import { auth, provider, signInWithPopup, db } from "@/firebaseConfig";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  increment,
+  collection,
+  addDoc,
+} from "firebase/firestore";
 
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
@@ -19,15 +30,50 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [user, setUser] = useState<User | null>(null);
+  const [usageCount, setUsageCount] = useState(0);
+
+  useEffect(() => {
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUser(user);
+        const userDoc = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userDoc);
+        if (userSnap.exists()) {
+          setUsageCount(userSnap.data().usageCount);
+        } else {
+          await setDoc(userDoc, { usageCount: 0 });
+        }
+      }
+    });
+  }, []);
+
+  const handleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
+    if (message.trim() && user) {
+      if (usageCount >= 5) {
+        setError("Has alcanzado el límite de 5 usos por semana.");
+        return;
+      }
       setIsLoading(true);
       setError(null);
       const newMessage = { role: "user", content: message };
       setMessages((prevMessages) => [...prevMessages, newMessage]);
 
       try {
+        // Guardar el mensaje del usuario en Firestore
+        const userMessagesRef = collection(db, "users", user.uid, "messages");
+        await addDoc(userMessagesRef, newMessage);
+
         const aiResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
@@ -67,6 +113,11 @@ export default function ChatInterface() {
             "Lo siento, no pude generar una respuesta.",
         };
         setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+        // Guardar el mensaje del asistente en Firestore
+        await addDoc(userMessagesRef, assistantMessage);
+        const userDoc = doc(db, "users", user.uid);
+        await updateDoc(userDoc, { usageCount: increment(1) });
+        setUsageCount((prevCount) => prevCount + 1);
       } catch (error) {
         console.error("Error al obtener la respuesta de OpenAI:", error);
         setError(
@@ -93,51 +144,64 @@ export default function ChatInterface() {
           ¿Qué está haciendo momo?
         </h1>
 
-        <div
-          id="chat-container"
-          className={`flex-1 overflow-y-auto mb-4 space-y-4  ${
-            messages.length === 0 ? "max-h-0" : "max-h-full"
-          }`}
-        >
-          {messages.map((msg, index) => (
-            <ChatMessage key={index} role={msg.role} content={msg.content} />
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
-          <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
-            <Textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Describí de la forma más detallada posible qué está haciendo momo"
-              className="w-full p-2 bg-gray-800 text-white rounded-lg resize-none"
-              rows={3}
-            />
-            <Button
-              type="submit"
-              disabled={isLoading || message.trim() === ""}
-              className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
+        {!user ? (
+          <Button onClick={handleLogin}>Iniciar sesión con Google</Button>
+        ) : (
+          <>
+            <div className="text-center mb-4">
+              <p>Usos restantes esta semana: {5 - usageCount}</p>
+            </div>
+            <div
+              id="chat-container"
+              className={`flex-1 overflow-y-auto mb-4 space-y-4  ${
+                messages.length === 0 ? "max-h-0" : "max-h-full"
+              }`}
             >
-              {isLoading ? (
-                "Enviando..."
-              ) : (
-                <>
-                  <svg
-                    className="w-5 h-5 rotate-90 rtl:-rotate-90"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 18 20"
-                  >
-                    <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
-                  </svg>
-                  <span className="sr-only">Send message</span>
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-        {error && <p className="text-red-500 mt-2">{error}</p>}
+              {messages.map((msg, index) => (
+                <ChatMessage
+                  key={index}
+                  role={msg.role}
+                  content={msg.content}
+                />
+              ))}
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
+              <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <Textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Describí de la forma más detallada posible qué está haciendo momo"
+                  className="w-full p-2 bg-gray-800 text-white rounded-lg resize-none"
+                  rows={3}
+                />
+                <Button
+                  type="submit"
+                  disabled={isLoading || message.trim() === ""}
+                  className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
+                >
+                  {isLoading ? (
+                    "Enviando..."
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5 rotate-90 rtl:-rotate-90"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 18 20"
+                      >
+                        <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+                      </svg>
+                      <span className="sr-only">Send message</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+            {error && <p className="text-red-500 mt-2">{error}</p>}
+          </>
+        )}
       </main>
     </div>
   );
