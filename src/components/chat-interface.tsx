@@ -17,7 +17,7 @@ import {
   addDoc,
   serverTimestamp,
 } from "firebase/firestore";
-
+import { Channel } from "@/types/kickChannel";
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true,
@@ -33,6 +33,27 @@ export default function ChatInterface() {
 
   const [user, setUser] = useState<User | null>(null);
   const [usageCount, setUsageCount] = useState(0);
+
+  const [momoData, setMomoData] = useState<Channel | null>(null);
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://kick.com/api/v2/channels/momoladinastia"
+        );
+        const data = await response.json();
+        if (data.livestream !== null) {
+          setIsLive(true);
+        }
+        setMomoData(data);
+      } catch (error) {
+        console.error("Error al obtener los datos del canal:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     auth.onAuthStateChanged(async (user) => {
@@ -149,9 +170,13 @@ export default function ChatInterface() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white transition-all duration-150">
       <main className="flex-1 flex flex-col p-4 max-w-4xl mx-auto w-full justify-center">
-        <h1 className="text-4xl md:text-6xl font-bold text-center mb-8">
-          ¿Qué está haciendo momo?
-        </h1>
+        <div className=" flex flex-row-reverse flex-nowrap items-start justify-center content-start">
+          {isLive ? <p>En linea</p> : <p>Offline</p>}
+          <h1 className="text-4xl md:text-6xl font-bold text-center mb-8">
+            ¿Qué está haciendo{" "}
+            <a href="https://kick.com/momoladinastia">momo</a>?
+          </h1>
+        </div>
 
         {!user ? (
           <Button onClick={handleLogin}>Iniciar sesión con Google</Button>
@@ -180,7 +205,7 @@ export default function ChatInterface() {
                 <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Describí de la forma más detallada posible qué está haciendo momo"
+                  placeholder={`Describí de la forma más detallada posible qué está haciendo ${momoData?.user.username}`}
                   className="w-full p-2 bg-gray-800 text-white rounded-lg resize-none"
                   rows={3}
                 />
