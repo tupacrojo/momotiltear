@@ -15,6 +15,7 @@ import {
   increment,
   collection,
   addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 
 const openai = new OpenAI({
@@ -66,14 +67,14 @@ export default function ChatInterface() {
       }
       setIsLoading(true);
       setError(null);
-      const newMessage = { role: "user", content: message };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      const userMessage = {
+        role: "user",
+        content: message,
+        timestamp: serverTimestamp(),
+      };
+      setMessages((prevMessages) => [...prevMessages, userMessage]);
 
       try {
-        // Guardar el mensaje del usuario en Firestore
-        const userMessagesRef = collection(db, "users", user.uid, "messages");
-        await addDoc(userMessagesRef, newMessage);
-
         const aiResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
@@ -111,10 +112,18 @@ export default function ChatInterface() {
           content:
             aiResponse.choices[0].message.content ||
             "Lo siento, no pude generar una respuesta.",
+          timestamp: serverTimestamp(),
         };
         setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-        // Guardar el mensaje del asistente en Firestore
-        await addDoc(userMessagesRef, assistantMessage);
+
+        // Guardar el chat completo en Firestore
+        const chatDocument = {
+          userMessage,
+          assistantMessage,
+        };
+        const userMessagesRef = collection(db, "users", user.uid, "messages");
+        await addDoc(userMessagesRef, chatDocument);
+
         const userDoc = doc(db, "users", user.uid);
         await updateDoc(userDoc, { usageCount: increment(1) });
         setUsageCount((prevCount) => prevCount + 1);
