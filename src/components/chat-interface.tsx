@@ -36,6 +36,7 @@ export default function ChatInterface() {
 
   const [momoData, setMomoData] = useState<Channel | null>(null);
   const [isLive, setIsLive] = useState(false);
+  const [docRef, setDocRef] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -143,7 +144,13 @@ export default function ChatInterface() {
           assistantMessage,
         };
         const userMessagesRef = collection(db, "users", user.uid, "messages");
-        await addDoc(userMessagesRef, chatDocument);
+        await addDoc(userMessagesRef, chatDocument).then((docRef) => {
+          updateDoc(docRef, {
+            id: docRef.id,
+          });
+          setDocRef(docRef.id);
+          return docRef;
+        });
 
         const userDoc = doc(db, "users", user.uid);
         await updateDoc(userDoc, { usageCount: increment(1) });
@@ -196,6 +203,8 @@ export default function ChatInterface() {
                   key={index}
                   role={msg.role}
                   content={msg.content}
+                  chatRef={docRef}
+                  userUid={user?.uid}
                 />
               ))}
             </div>
