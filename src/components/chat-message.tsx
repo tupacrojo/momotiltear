@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import React, { useState } from "react";
 import { collection, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { Textarea } from "@/components/ui/textarea";
+import { EditableDiv } from "./ui/EditableDiv";
 
 interface ChatMessageProps {
   role: string;
@@ -68,9 +68,9 @@ export function ChatMessage({
           }`}
         >
           {isEditing ? (
-            <Textarea
+            <EditableDiv
               value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
+              onChange={(e) => setEditedContent(e)}
             />
           ) : (
             <p>{content}</p>

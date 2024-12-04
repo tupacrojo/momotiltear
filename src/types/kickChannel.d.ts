@@ -80,7 +80,7 @@ export interface Channel {
   followers_count: number;
   subscriber_badges: Array;
   banner_image: BannerImage;
-  livestream: boolean;
+  livestream: Livestream ;
   role: string | null;
   muted: boolean;
   follower_badges: Array;
@@ -90,4 +90,40 @@ export interface Channel {
   can_host: boolean;
   user: User;
   chatroom: Chatroom;
+}
+interface Thumbnail {
+  url: string;
+}
+
+interface LivestreamCategory {
+  id: number;
+  category_id: number;
+  name: string;
+  slug: string;
+  tags: string[];
+  description: string | null;
+  deleted_at: string | null;
+  viewers: number;
+  is_mature: boolean;
+  category: Category;
+}
+
+interface Livestream {
+  id: number;
+  slug: string;
+  channel_id: number;
+  created_at: string;
+  session_title: string;
+  is_live: boolean;
+  risk_level_id: number | null;
+  start_time: string;
+  source: string | null;
+  twitch_channel: string | null;
+  duration: number;
+  language: string;
+  is_mature: boolean;
+  viewer_count: number;
+  thumbnail: Thumbnail;
+  categories: LivestreamCategory[];
+  tags: string[];
 }
