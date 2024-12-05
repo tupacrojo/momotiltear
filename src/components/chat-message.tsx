@@ -1,6 +1,12 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import React, { useState } from "react";
-import { collection, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  updateDoc,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { EditableDiv } from "./ui/EditableDiv";
 
@@ -32,6 +38,10 @@ export function ChatMessage({
     await saveSuggestion(userUid, chatRef, editedContent);
   };
 
+  const handleShareClick = async () => {
+    await handleShare(chatRef, userUid);
+  };
+
   const saveSuggestion = async (
     userUid: string,
     chatRef: string,
@@ -50,6 +60,29 @@ export function ChatMessage({
       });
     } catch (error) {
       console.error("Error al guardar la sugerencia: ", error);
+    }
+  };
+
+  const handleShare = async (chatRef: string, userUid: string) => {
+    try {
+      const messageRef = doc(
+        collection(db, "users", userUid, "messages"),
+        chatRef
+      );
+
+      const publicConversation = {
+        messageRef,
+        users: [userUid],
+        likes: 0,
+        metadata: {
+          originalUserId: userUid,
+          sharedAt: serverTimestamp(),
+        },
+      };
+
+      await addDoc(collection(db, "public_conversations"), publicConversation);
+    } catch (error) {
+      console.error("Error al compartir la conversación: ", error);
     }
   };
 
@@ -94,7 +127,10 @@ export function ChatMessage({
             <p>{content}</p>
           )}
           {role === "assistant" && !isEditing && (
-            <button onClick={handleEditClick}>Sugerencia</button>
+            <>
+              <button onClick={handleEditClick}>Sugerencia</button>
+              <button onClick={handleShareClick}>Compartir</button>
+            </>
           )}
           {isEditing && <button onClick={handleSaveClick}>Guardar</button>}
         </div>
