@@ -4,6 +4,9 @@ import { collection, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { EditableDiv } from "./ui/EditableDiv";
 
+import Image from "next/image";
+import { auth } from "@/firebaseConfig";
+
 interface ChatMessageProps {
   role: string;
   content: string;
@@ -60,7 +63,22 @@ export function ChatMessage({
         }`}
       >
         <Avatar className={role === "user" ? "bg-blue-500" : "bg-green-500"}>
-          <AvatarFallback>{role === "user" ? "TÚ" : "AI"}</AvatarFallback>
+          <AvatarFallback>
+            {role === "user" ? (
+              auth.currentUser?.photoURL ? (
+                <Image
+                  src={auth.currentUser?.photoURL}
+                  width={800}
+                  height={800}
+                  alt="perfil"
+                />
+              ) : (
+                "TU"
+              )
+            ) : (
+              "AI"
+            )}
+          </AvatarFallback>
         </Avatar>
         <div
           className={`min-w-full p-3 rounded-lg ${

@@ -46,7 +46,6 @@ export default function ChatInterface() {
           "https://kick.com/api/v2/channels/momoladinastia"
         );
         const data = await response.json();
-        console.log(data);
         if (data.livestream !== null) {
           setIsLive(true);
         }
@@ -76,7 +75,25 @@ export default function ChatInterface() {
   const handleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
+      const user = result.user;
+      const userDoc = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDoc);
+
+      if (!userSnap.exists()) {
+        await setDoc(userDoc, {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          usageCount: 0,
+          createdAt: serverTimestamp(),
+        });
+      } else {
+        await updateDoc(userDoc, {
+          lastLogin: serverTimestamp(),
+        });
+      }
+      setUser(user);
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
     }

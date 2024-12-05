@@ -10,24 +10,16 @@ interface EditableDivProps {
 
 const EditableDiv = React.forwardRef<HTMLDivElement, EditableDivProps>(
   (
-    {
-      className,
-      placeholder = "Enviar un mensaje",
-      onChange,
-      value = "",
-      ...props
-    },
+    { className, placeholder = "Enviar un mensaje", onChange, ...props },
     ref
   ) => {
     const [content, setContent] = React.useState("");
     const [isFocused, setIsFocused] = React.useState(false);
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-      if (value) {
-        setContent(value);
-      }
-      setContent(e.currentTarget.textContent || "");
-      onChange(content);
+      const newContent = e.currentTarget.textContent || "";
+      setContent(newContent);
+      onChange(newContent);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -46,7 +38,7 @@ const EditableDiv = React.forwardRef<HTMLDivElement, EditableDivProps>(
             className
           )}
         >
-          <div className="relative w-full" dir="ltr">
+          <div className="relative w-full align-middle" dir="ltr">
             <div
               ref={ref}
               contentEditable
@@ -57,6 +49,7 @@ const EditableDiv = React.forwardRef<HTMLDivElement, EditableDivProps>(
               onBlur={() => setIsFocused(false)}
               onKeyDown={handleKeyDown}
               className={cn(
+                "flex items-center",
                 "editor-input min-h-[40px] max-h-[200px] overflow-y-auto",
                 "outline-none whitespace-pre-wrap break-words",
                 "text-sm text-gray-900 dark:text-white"
