@@ -197,9 +197,9 @@ export default function ChatInterface() {
     <div className="flex flex-col min-h-screen text-white transition-all duration-150">
       <main className="flex-1 flex flex-col p-4 max-w-4xl mx-auto w-full justify-center">
         <div className=" flex flex-row-reverse flex-nowrap items-start justify-center content-start">
-          <div className="flex text-4xl md:text-6xl font-bold text-center mb-8">
-            <span>¿Qué está haciendo</span>
-            <span className="flex ms-2">
+          <div className="flex flex-wrap flex-shrink justify-center items-center text-4xl md:text-6xl font-bold text-center mb-8">
+            <span className="text-nowrap">¿Qué está haciendo</span>
+            <span className="text-nowrap flex ms-2">
               <a
                 className="relative"
                 target="_blank"
@@ -230,13 +230,13 @@ export default function ChatInterface() {
                     </span>
                   </div>
                 ) : (
-                  <span className="text-xs font-medium text-center p-0.5 leading-none rounded-full px-2 bg-blue-900 text-blue-200 absolute -translate-y-1/2 translate-x-1/2 right-1/2">
+                  <span className="flex items-center p-0.5 text-nowrap text-xs font-medium text-center leading-none rounded-full px-2 bg-blue-900 text-blue-200 absolute -translate-y-1/2 translate-x-1/2 right-1/2">
                     Desconectado
                   </span>
                 )}
               </a>
             </span>
-            <span>?</span>
+            <span className="text-nowrap">?</span>
           </div>
         </div>
 

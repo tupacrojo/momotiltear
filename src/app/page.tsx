@@ -3,14 +3,10 @@ import ChatInterface from "@/components/chat-interface";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 
-
 export default function Home() {
-
-
   function handleLogout() {
     signOut(auth)
       .then(() => {
-        console.log("User signed out");
         window.location.reload();
       })
       .catch((error) => {
