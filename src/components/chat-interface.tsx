@@ -198,8 +198,10 @@ export default function ChatInterface() {
       <main className="flex-1 flex flex-col p-4 max-w-4xl mx-auto w-full justify-center">
         <div className=" flex flex-row-reverse flex-nowrap items-start justify-center content-start">
           <div className="flex flex-wrap flex-shrink justify-center items-center text-4xl md:text-6xl font-bold text-center mb-8">
-            <span className="text-nowrap">¿Qué está haciendo</span>
-            <span className="text-nowrap flex ms-2">
+            <span className="text-nowrap cursor-default">
+              ¿Qué está haciendo
+            </span>
+            <span className="text-nowrap flex ms-2 cursor-pointer relative">
               <a
                 className="relative"
                 target="_blank"
@@ -207,7 +209,7 @@ export default function ChatInterface() {
               >
                 momo
                 {isLive ? (
-                  <div className="flex items-center gap-1 text-sm font-bold">
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 flex items-center gap-1 text-sm font-bold">
                     <svg
                       width="32"
                       height="32"
@@ -230,18 +232,58 @@ export default function ChatInterface() {
                     </span>
                   </div>
                 ) : (
-                  <span className="flex items-center p-0.5 text-nowrap text-xs font-medium text-center leading-none rounded-full px-2 bg-blue-900 text-blue-200 absolute -translate-y-1/2 translate-x-1/2 right-1/2">
+                  <span className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 flex items-center p-0.5 text-nowrap text-xs font-medium text-center leading-none rounded-full px-2 bg-blue-900 text-blue-200">
                     Desconectado
                   </span>
                 )}
               </a>
             </span>
-            <span className="text-nowrap">?</span>
+            <span className="text-nowrap cursor-default">?</span>
           </div>
         </div>
 
         {!user ? (
-          <Button onClick={handleLogin}>Iniciar sesión con Google</Button>
+          <Button variant={"google"} onClick={handleLogin}>
+            <svg
+              className="h-10 w-10"
+              xmlns="http://www.w3.org/2000/svg"
+              width="80px"
+              height="80px"
+              viewBox="0 0 32 32"
+              data-name="Layer 1"
+              id="Layer_1"
+            >
+              <path
+                d="M23.75,16A7.7446,7.7446,0,0,1,8.7177,18.6259L4.2849,22.1721A13.244,13.244,0,0,0,29.25,16"
+                fill="#00ac47"
+              />
+              <path
+                d="M23.75,16a7.7387,7.7387,0,0,1-3.2516,6.2987l4.3824,3.5059A13.2042,13.2042,0,0,0,29.25,16"
+                fill="#4285f4"
+              />
+              <path
+                d="M8.25,16a7.698,7.698,0,0,1,.4677-2.6259L4.2849,9.8279a13.177,13.177,0,0,0,0,12.3442l4.4328-3.5462A7.698,7.698,0,0,1,8.25,16Z"
+                fill="#ffba00"
+              />
+              <polygon
+                fill="#2ab2db"
+                points="8.718 13.374 8.718 13.374 8.718 13.374 8.718 13.374"
+              />
+              <path
+                d="M16,8.25a7.699,7.699,0,0,1,4.558,1.4958l4.06-3.7893A13.2152,13.2152,0,0,0,4.2849,9.8279l4.4328,3.5462A7.756,7.756,0,0,1,16,8.25Z"
+                fill="#ea4435"
+              />
+              <polygon
+                fill="#2ab2db"
+                points="8.718 18.626 8.718 18.626 8.718 18.626 8.718 18.626"
+              />
+              <path
+                d="M29.25,15v1L27,19.5H16.5V14H28.25A1,1,0,0,1,29.25,15Z"
+                fill="#4285f4"
+              />
+            </svg>
+            <p>Iniciar sesión con Google</p>
+          </Button>
         ) : (
           <>
             <div className="text-center mb-4">

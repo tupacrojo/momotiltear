@@ -8,6 +8,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        google:
+          "flex items-center w-fit rounded-lg shadow-md px-6 py-2 space-x-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500",
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
@@ -43,6 +45,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
+        type="button"
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
